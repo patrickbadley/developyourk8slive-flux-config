@@ -1,9 +1,9 @@
 ## Installing Cluster Using Flux in Azure AKS ##
-0. Fork this repo (you will need to update references to the repository name in releases/default/developYourK8sRelease.yaml and url in charts/developyourk8s/values.yaml as well as any references to developyourk8s in this readme)
+0. Fork this repo (you will need to update references to the repository name in releases/default/developyourk8sliveRelease.yaml and url in charts/developyourk8slive/values.yaml as well as any references to developyourk8slive in this readme)
 
 1. Connect to your k8s cluster in azure cli
 ```bash
-az aks get-credentials --resource-group developyourk8s  --name developyourk8s
+az aks get-credentials --resource-group developyourk8slive  --name developyourk8slive
 ```
 2. Configure Helm in your cluster
 ```bash
@@ -27,7 +27,7 @@ IP=$(kubectl describe svc nginx-ingress-controller -n kube-system | grep "LoadBa
 
 echo $IP
 
-DNSNAME="developyourk8s"
+DNSNAME="developyourk8slive"
 
 PUBLICIPID=$(az network public-ip list --query "[?ipAddress!=null]|[?contains(ipAddress, '$IP')].[id]" --output tsv)
 
@@ -35,7 +35,7 @@ az network public-ip update --ids $PUBLICIPID --dns-name $DNSNAME
 
 helm install --name cert-manager --namespace kube-system stable/cert-manager
 ```
-5. At this point you should be able to visit http://developyourk8s.eastus.cloudapp.azure.com/ and see "default backend - 404"
+5. At this point you should be able to visit http://developyourk8slive.eastus.cloudapp.azure.com/ and see "default backend - 404"
 6. Now we'll install flux and connect it to our configuration repository
 ```bash
 helm repo add fluxcd https://charts.fluxcd.io
@@ -45,7 +45,7 @@ kubectl apply -f https://raw.githubusercontent.com/fluxcd/flux/helm-0.10.1/deplo
 helm upgrade -i flux \
 --set helmOperator.create=true \
 --set helmOperator.createCRD=false \
---set git.url=git@github.com:patrickbadley/developyourk8s-flux-config.git \
+--set git.url=git@github.com:patrickbadley/developyourk8slive-flux-config.git \
 --set git.pollInterval="10s" \
 --set syncInterval="10s" \
 --namespace flux \
@@ -67,7 +67,7 @@ kubectl -n flux logs deployment/flux | grep identity.pub | cut -d '"' -f2
 ```bash
 helm upgrade cert-manager     stable/cert-manager     --namespace kube-system     --set ingressShim.defaultIssuerName=letsencrypt-prod --set ingressShim.defaultIssuerKind=ClusterIssuer
 ```
-12. Now go to https://developyourk8s.eastus.cloudapp.azure.com/ and see your app running!
+12. Now go to https://developyourk8slive.eastus.cloudapp.azure.com/ and see your app running!
 
 ### Helpful commands 
 ```bash
